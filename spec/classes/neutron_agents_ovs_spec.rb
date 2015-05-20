@@ -23,6 +23,12 @@ describe 'neutron::agents::ovs' do
     }
   end
 
+  let :default_facts do
+    { :operatingsystem           => 'default',
+      :operatingsystemrelease    => 'default'
+    }
+  end
+
   let :params do
     {}
   end
@@ -116,13 +122,13 @@ describe 'neutron::agents::ovs' do
 
       it 'should configure bridge mappings' do
         is_expected.to contain_neutron__plugins__ovs__bridge(params[:bridge_mappings].join(',')).with(
-          :before => 'Service[neutron-plugin-ovs-service]'
+          :before => ['Service[neutron-plugin-ovs-service]']
         )
       end
 
       it 'should configure bridge uplinks' do
         is_expected.to contain_neutron__plugins__ovs__port(params[:bridge_uplinks].join(',')).with(
-          :before => 'Service[neutron-plugin-ovs-service]'
+          :before => ['Service[neutron-plugin-ovs-service]']
         )
       end
     end
@@ -166,7 +172,7 @@ describe 'neutron::agents::ovs' do
 
   context 'on Debian platforms' do
     let :facts do
-      { :osfamily => 'Debian' }
+      default_facts.merge({ :osfamily => 'Debian' })
     end
 
     let :platform_params do
@@ -179,7 +185,7 @@ describe 'neutron::agents::ovs' do
 
   context 'on RedHat platforms' do
     let :facts do
-      { :osfamily => 'RedHat' }
+      default_facts.merge({ :osfamily => 'RedHat' })
     end
 
     let :platform_params do

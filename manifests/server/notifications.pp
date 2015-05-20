@@ -76,11 +76,11 @@ class neutron::server::notifications (
   # Depend on the specified keystone_user resource, if it exists.
   Keystone_user <| title == 'nova' |> -> Class[neutron::server::notifications]
 
-  if ! $nova_admin_password {
+  if ! ($nova_admin_password and $nova_admin_password != '') {
     fail('nova_admin_password must be set.')
   }
 
-  if ! ( $nova_admin_tenant_id or $nova_admin_tenant_name ) {
+  if ! (($nova_admin_tenant_id and $nova_admin_tenant_id != '') or ($nova_admin_tenant_name and $nova_admin_tenant_name != '')) {
     fail('You must provide either nova_admin_tenant_name or nova_admin_tenant_id.')
   }
 
@@ -95,7 +95,7 @@ class neutron::server::notifications (
     'DEFAULT/nova_region_name':                   value => $nova_region_name;
   }
 
-  if $nova_admin_tenant_id {
+  if $nova_admin_tenant_id and $nova_admin_tenant_id != '' {
     neutron_config {
       'DEFAULT/nova_admin_tenant_id': value => $nova_admin_tenant_id;
     }

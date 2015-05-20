@@ -14,6 +14,12 @@ describe 'neutron::plugins::ovs' do
    }
   end
 
+  let :default_facts do
+    { :operatingsystem           => 'default',
+      :operatingsystemrelease    => 'default'
+    }
+  end
+
   let :params do
     { }
   end
@@ -175,7 +181,7 @@ describe 'neutron::plugins::ovs' do
 
   context 'on Debian platforms' do
     let :facts do
-      { :osfamily => 'Debian' }
+      default_facts.merge({ :osfamily => 'Debian' })
     end
 
     let :platform_params do
@@ -187,7 +193,7 @@ describe 'neutron::plugins::ovs' do
 
   context 'on RedHat platforms' do
     let :facts do
-      { :osfamily => 'RedHat' }
+      default_facts.merge({ :osfamily => 'RedHat' })
     end
 
     let :params do

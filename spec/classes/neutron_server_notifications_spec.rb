@@ -17,7 +17,7 @@ require 'spec_helper'
 
 describe 'neutron::server::notifications' do
     let :pre_condition do
-        'define keystone_user ($name) {}'
+        'define keystone_user() {}'
     end
 
     let :default_params do
@@ -31,6 +31,12 @@ describe 'neutron::server::notifications' do
             :nova_admin_tenant_name             => 'services',
             :nova_region_name                   => 'RegionOne'
         }
+    end
+
+    let :default_facts do
+      { :operatingsystem           => 'default',
+        :operatingsystemrelease    => 'default'
+      }
     end
 
     let :params do
@@ -125,7 +131,7 @@ describe 'neutron::server::notifications' do
 
     context 'on Debian platforms' do
         let :facts do
-            { :osfamily => 'Debian' }
+            default_facts.merge({ :osfamily => 'Debian' })
         end
 
         let :platform_params do
@@ -137,7 +143,7 @@ describe 'neutron::server::notifications' do
 
     context 'on RedHat platforms' do
         let :facts do
-            { :osfamily => 'RedHat' }
+            default_facts.merge({ :osfamily => 'RedHat' })
         end
 
         let :platform_params do
