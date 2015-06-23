@@ -21,7 +21,57 @@ describe provider_class do
     }
   end
 
-  describe 'when updating a network' do
+  shared_examples 'neutron_network' do
+    describe 'when updating a network' do
+
+      it 'should call net-update to change admin_state_up' do
+        provider.expects(:auth_neutron).with('net-update',
+                                             '--admin_state_up=False',
+                                             net_name)
+        provider.admin_state_up=('False')
+      end
+
+      it 'should call net-update to change shared' do
+        provider.expects(:auth_neutron).with('net-update',
+                                             '--shared=True',
+                                             net_name)
+        provider.shared=('True')
+      end
+
+      it 'should call net-update to change router_external' do
+        provider.expects(:auth_neutron).with('net-update',
+                                             '--router:external=False',
+                                             net_name)
+        provider.router_external=('False')
+      end
+
+      it 'should call net-update to change router_external' do
+        provider.expects(:auth_neutron).with('net-update',
+                                             '--router:external',
+                                             net_name)
+        provider.router_external=('True')
+      end
+
+      [:provider_network_type, :provider_physical_network, :provider_segmentation_id].each do |attr|
+        it "should fail when #{attr.to_s} is update " do
+          expect do
+            provider.send("#{attr}=", 'foo')
+          end.to raise_error(Puppet::Error, /does not support being updated/)
+        end
+      end
+
+      describe 'when creating a network' do
+        it 'should call net-create with stuff' do
+          provider.expects(:auth_neutron).with('net-create')
+
+          provider.create
+        end
+      end
+
+    end
+  end
+
+  describe "with tenant_id set" do
     let :resource do
       Puppet::Type::Neutron_network.new(net_attrs)
     end
@@ -30,42 +80,26 @@ describe provider_class do
       provider_class.new(resource)
     end
 
-    it 'should call net-update to change admin_state_up' do
-      provider.expects(:auth_neutron).with('net-update',
-                                           '--admin_state_up=False',
-                                           net_name)
-      provider.admin_state_up=('False')
+    it_behaves_like('neutron_network')
+  end
+
+  describe "with tenant_name set" do
+
+    let :local_attrs do
+      attrs = net_attrs.merge({:tenant_name => 'a_person'})
+      attrs.delete(:tenant_id)
+      attrs
     end
 
-    it 'should call net-update to change shared' do
-      provider.expects(:auth_neutron).with('net-update',
-                                           '--shared=True',
-                                           net_name)
-      provider.shared=('True')
+    let :resource do
+      Puppet::Type::Neutron_network.new(local_attrs)
     end
 
-    it 'should call net-update to change router_external' do
-      provider.expects(:auth_neutron).with('net-update',
-                                           '--router:external=False',
-                                           net_name)
-      provider.router_external=('False')
+    let :provider do
+      provider_class.new(resource)
     end
 
-    it 'should call net-update to change router_external' do
-      provider.expects(:auth_neutron).with('net-update',
-                                           '--router:external',
-                                           net_name)
-      provider.router_external=('True')
-    end
-
-    [:provider_network_type, :provider_physical_network, :provider_segmentation_id].each do |attr|
-      it "should fail when #{attr.to_s} is update " do
-        expect do
-          provider.send("#{attr}=", 'foo')
-        end.to raise_error(Puppet::Error, /does not support being updated/)
-      end
-    end
-
+    it_behaves_like('neutron_network')
   end
 
 end
